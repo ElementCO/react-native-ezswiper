@@ -12,6 +12,7 @@ import {
     ScrollView,
     Animated,
     InteractionManager,
+    Platform
 } from 'react-native'
 
 export default class EZSwiper extends Component<{}> {
@@ -157,6 +158,15 @@ export default class EZSwiper extends Component<{}> {
     */
     scrollTo(index, animated = true) {
         this.scrollView && this.scrollView.scrollTo({ [this.ezswiper.scrollToDirection]: this.ezswiper.side * index, animated: animated });
+        if (index === this.props.dataSource.length && Platform.OS === 'android') {
+
+        setTimeout(()=> {
+
+          this.scrollTo(this.scrollIndex + 1);
+
+        },this.ezswiper.autoplayTimeout * 1000);
+
+      }
     }
 
     /**
@@ -241,7 +251,13 @@ export default class EZSwiper extends Component<{}> {
             if (this.ezswiper.loop) {
                 if (Math.abs(offset - ((this.ezswiper.count + 1) * this.ezswiper.side)) < 20.1) {
                     offset = this.ezswiper.side
-                    this.scrollView.scrollTo({ [this.ezswiper.scrollToDirection]: offset, animated: false });
+                    if(Platform.OS === 'android'){
+                        this.scrollView.scrollTo(); // 必须要先调取ScrollTo后再给值
+                        this.scrollView.scrollTo({ [this.ezswiper.scrollToDirection]: offset, animated: false });   
+                    }else{
+                        this.scrollView.scrollTo({ [this.ezswiper.scrollToDirection]: offset, animated: false });
+                    }
+                    
                 } else if (Math.abs(offset) < 20.1) {
                     offset = this.ezswiper.side * this.ezswiper.count
                     this.scrollView.scrollTo({ [this.ezswiper.scrollToDirection]: offset, animated: false });
